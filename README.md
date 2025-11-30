@@ -1,7 +1,7 @@
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.ryntric/workers.svg)](https://search.maven.org/artifact/io.github.ryntric/workers)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.ryntric/workers.svg)](https://search.maven.org/artifact/io.github.ryntric/affinity-dispatcher)
 [![LICENSE](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ryntric/workers/blob/master/LICENSE)
-[![Maven CI](https://github.com/ryntric/workers/actions/workflows/maven-build.yml/badge.svg)](https://github.com/ryntric/workers/actions/workflows/maven-build.yml)
-[![pages-build-deployment](https://github.com/ryntric/workers/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/ryntric/workers/actions/workflows/pages/pages-build-deployment)
+[![Maven CI](https://github.com/ryntric/workers/actions/workflows/maven-build.yml/badge.svg)](https://github.com/ryntric/affinity-dispatcher/actions/workflows/maven-build.yml)
+[![pages-build-deployment](https://github.com/ryntric/workers/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/ryntric/affinity-dispatcher/actions/workflows/pages/pages-build-deployment)
 
 # 🚀 Affinity Dispatcher
 
