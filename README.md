@@ -68,17 +68,13 @@ Internal message queue:
 ## 🛠️ Usage Example
 
 ```java
-AffinityDispatcher<String> dispatcher = new AffinityDispatcher<>(
-    "testDispatcher",
-     value -> {},
-    DefaultHashCodeProvider.INSTANCE,
-    Config.builder().build()
-);
+Handler<Object> handler = (workerName, value) -> {
+    System.out.println("Handled by " + workerName + ": " + value);
+};
+AffinityDispatcher<Object> dispatcher = new AffinityDispatcher<>("test", handler, DefaultHashCodeProvider.INSTANCE, Config.builder().build());
+dispatcher.start();
 
-dispatcher.start(); // ✅ Start workers
-
-dispatcher.dispatch("key1", "Hello World"); // 📤 Dispatch messages
-dispatcher.dispatch(42, "Another message");
-
-dispatcher.shutdown(); // 🛑 Stop workers
+for (int i = 0; i < 10_000_000; i++) {
+    dispatcher.dispatch(UUID.randomUUID().toString(), i);
+}
 ```

@@ -1,7 +1,5 @@
 package io.github.ryntric;
 
-import java.util.function.Consumer;
-
 final class WorkerFactory<T> {
     private static final String NAME_TEMPLATE = "%s-worker-th-%d";
 
@@ -9,11 +7,11 @@ final class WorkerFactory<T> {
     private final int priority;
     private final ThreadGroup group;
     private final int batchsize;
-    private final Consumer<T> handler;
+    private final Handler<T> handler;
 
     private int nextId = 0;
 
-    public WorkerFactory(String name, int priority, int batchsize, Consumer<T> handler) {
+    public WorkerFactory(String name, int priority, int batchsize, Handler<T> handler) {
         this.name = name;
         this.priority = priority;
         this.group = new ThreadGroup(name);

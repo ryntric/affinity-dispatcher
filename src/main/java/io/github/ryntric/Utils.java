@@ -1,6 +1,6 @@
 package io.github.ryntric;
 
-final class Utils {
+public final class Utils {
     private static final Runtime RUNTIME = Runtime.getRuntime();
     private static final Integer AVAILABLE_PROCESSORS = RUNTIME.availableProcessors();
 

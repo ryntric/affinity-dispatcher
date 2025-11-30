@@ -2,8 +2,8 @@ package io.github.ryntric;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 /**
  * AffinityDispatcher is a high-performance dispatcher that routes messages between workers based on a key's hash code.
@@ -35,7 +35,7 @@ public final class AffinityDispatcher<T> {
      * @param hashCodeProvider provider to compute hash codes from keys
      * @param config           dispatcher configuration (worker count, buffer size, etc.)
      */
-    public AffinityDispatcher(String name, Consumer<T> handler, HashCodeProvider hashCodeProvider, Config config) {
+    public AffinityDispatcher(String name, Handler<T> handler, HashCodeProvider hashCodeProvider, Config config) {
         this.name = name;
         this.workerCount = config.getWorkerCount();
         this.nodesPerWorker = config.getRoutingNodePerWorker();
@@ -47,7 +47,7 @@ public final class AffinityDispatcher<T> {
         this.init(name, handler, config);
     }
 
-    private void init(String name, Consumer<T> handler, Config config) {
+    private void init(String name, Handler<T> handler, Config config) {
         WorkerFactory<T> workerFactory = new WorkerFactory<>(name, config.getWorkerThreadPriority(), config.getBatchSize(), handler);
 
         for (int i = 0; i < workerCount; i++) {
@@ -210,6 +210,19 @@ public final class AffinityDispatcher<T> {
             result.put(worker.getName(), worker.getChannelSize());
         }
         return result;
+    }
+
+    public static void main(String[] args) {
+        Handler<Object> handler = (workerName, value) -> {
+            System.out.println("Handled by " + workerName + ": " + value);
+        };
+        AffinityDispatcher<Object> dispatcher = new AffinityDispatcher<>("test", handler, DefaultHashCodeProvider.INSTANCE, Config.builder().build());
+
+        dispatcher.start();
+
+        for (int i = 0; i < 10_000_000; i++) {
+            dispatcher.dispatch(UUID.randomUUID().toString(), i);
+        }
     }
 
 }
