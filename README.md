@@ -3,88 +3,82 @@
 [![Maven CI](https://github.com/ryntric/workers/actions/workflows/maven-build.yml/badge.svg)](https://github.com/ryntric/workers/actions/workflows/maven-build.yml)
 [![pages-build-deployment](https://github.com/ryntric/workers/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/ryntric/workers/actions/workflows/pages/pages-build-deployment)
 
-Workers is a high-performance Java library for distributing events across multiple worker threads.
-It is designed around ring buffers, lock-free sequences, and consistent hashing to achieve predictable throughput and low latency.
+# 🚀 Affinity Dispatcher
 
-### ✨ Features
+**Affinity Dispatcher** is a high-performance, low-latency message routing framework in Java.
+It routes messages to workers based on key affinity and supports multiple key types.
 
-- ⚡ High performance: lock-free queues with cache-line padding to minimize contention.
+---
 
-- 🎯 Consistent hashing: route events to the correct worker based on a key.
+## 📚 Table of Contents
 
-- 🧩 Pluggable factories & handlers: customize how events are created and processed.
+- [Overview](#overview)  
+- [Key Components](#key-components) 
 
-- 🛡️ Fault isolation: if one worker fails, others continue to process events.
+---
 
-- 🧵 Thread-aware design: workers run on dedicated threads with controlled lifecycle.
+## Overview
 
-### 📦 Core Concepts
+The dispatcher uses a **multiply-high scaling algorithm** to map hash codes to routing nodes efficiently.  
 
-- WorkerService – orchestrates a pool of workers, distributes events based on keys.
+✨ **Features:**  
 
-- WorkerNode – logical partition that maps to a worker (with replicas for load balancing).
+- Lock-free internal channels (SPSC / MPSC)  
+- Configurable worker count & routing nodes  
+- Branchless and consistent key routing  
+- Low-latency message handling  
+- Atomic state management (started, non-started, terminated)
 
-- Worker – lightweight event processor that consumes from a ring buffer.
+---
 
-- EventHandler – user-defined callback for handling events.
+## Key Components
 
-- EventFactory – supplier for creating reusable event objects.
+### 🏗️ `AffinityDispatcher<T>`
 
-### 🚀 Example Usage
+Main dispatcher for routing messages to workers.  
+
+**Supports:** `int`, `long`, `String`, `byte[]` keys  
+
+**Important Methods:**  
+
+- `dispatch(String key, T value)`  
+- `dispatch(int key, T value)`  
+- `dispatch(long key, T value)`  
+- `dispatch(byte[] key, T value)`  
+- `start()` ✅  
+- `shutdown()` 🛑  
+
+### 👷 `Worker<T>`
+
+Worker thread consuming messages from its channel.  
+
+### 🗂️ `RoutingNode<T>`
+
+Routing table node holding a reference to a worker and publishing messages.  
+
+### 📡 `Channel<T>`
+
+Internal message queue:  
+
+- **SPSC** – Single-producer, single-consumer  
+- **MPSC** – Multi-producer, single-consumer  
+
+---
+
+## 🛠️ Usage Example
 
 ```java
-private static final EventHandler<Event> EVENT_HANDLER = new EventHandler<>() {
-    @Override
-    public void onEvent(String name, Event event, long sequence) {
-        System.out.println("Worker name: " + name + ", sequence: " + sequence);
-    }
+AffinityDispatcher<String> dispatcher = new AffinityDispatcher<>(
+    "testDispatcher",
+     value -> {},
+    DefaultHashCodeProvider.INSTANCE,
+    Config.builder().build()
+);
 
-    @Override
-    public void onError(String name, Event event, long sequence, Throwable ex) {
+dispatcher.start(); // ✅ Start workers
 
-    }
+dispatcher.dispatch("key1", "Hello World"); // 📤 Dispatch messages
+dispatcher.dispatch(42, "Another message");
 
-    @Override
-    public void onStart(String name) {
-
-    }
-
-    @Override
-    public void onShutdown(String name) {
-
-    }
-};
-private static final EventFactory<Event> EVENT_FACTORY = Event::new;
-private static final EventTranslatorOneArg<Event, Integer>  EVENT_TRANSLATOR = Event::setId;
-private static final WorkerService<Event> WORKER_SERVICE = new WorkerService<>("test", EVENT_HANDLER, EVENT_FACTORY, DefaultHashCodeProvider.INSTANCE, WorkerServiceConfig.INSTANCE);
-
-void main(String[] args) {
-    WORKER_SERVICE.start();
-    for (int i = 0; i < 10_000_000; i++) {
-        WORKER_SERVICE.publishEvent(i, EVENT_TRANSLATOR, i);
-    }
-    WORKER_SERVICE.shutdown();
-}
-
-public static class Event {
-    private int id;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-}
+dispatcher.shutdown(); // 🛑 Stop workers
 ```
-
-### ⚠️ Exceptions
-
-WorkerServiceTerminatedException – thrown when a worker service is shut down or no longer available.
-
-### 📊 Performance
-
-Optimized for millions of events per second on modern CPUs.
-
-Scales with number of workers (power of 2 recommended for distribution).
