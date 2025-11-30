@@ -2,7 +2,6 @@ package io.github.ryntric;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -210,19 +209,6 @@ public final class AffinityDispatcher<T> {
             result.put(worker.getName(), worker.getChannelSize());
         }
         return result;
-    }
-
-    public static void main(String[] args) {
-        Handler<Object> handler = (workerName, value) -> {
-            System.out.println("Handled by " + workerName + ": " + value);
-        };
-        AffinityDispatcher<Object> dispatcher = new AffinityDispatcher<>("test", handler, DefaultHashCodeProvider.INSTANCE, Config.builder().build());
-
-        dispatcher.start();
-
-        for (int i = 0; i < 10_000_000; i++) {
-            dispatcher.dispatch(UUID.randomUUID().toString(), i);
-        }
     }
 
 }
